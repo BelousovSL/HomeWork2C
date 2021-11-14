@@ -1,11 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace Otus2.Data
 {
     public class OtusDbContext : DbContext
     {
-
-        private string _connectionString;
         public DbSet<TrainingProgram> TrainingPrograms { get; set; }
 
         public DbSet<Client> Clients { get; set; }
@@ -16,13 +15,15 @@ namespace Otus2.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql(_connectionString);
-        }
 
-        public OtusDbContext(string connectionString)
-        {
-            _connectionString = connectionString;
-        }
+            IConfiguration Configuration = new ConfigurationBuilder()
+               .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+               .AddEnvironmentVariables()
+               .Build();
 
+            var connectionString = Configuration.GetSection("ConnectionString").Value;
+
+            optionsBuilder.UseNpgsql(connectionString);
+        }
     }
 }
